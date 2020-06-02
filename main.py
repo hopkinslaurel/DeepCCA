@@ -24,6 +24,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model_x', dest=model_x)
 parser.add_argument('--model_y', dest=model_y)
 parser.add_argument('--dim', dest=dim, type=int, default=64)
+args = parser.parse_args()
+print(args)
 
 torch.set_default_tensor_type(torch.DoubleTensor)
 
