@@ -15,6 +15,16 @@ except ImportError:
 import gzip
 import numpy as np
 import torch.nn as nn
+import argparse
+
+
+#Parse command line arguments
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--model_x', dest=model_x)
+parser.add_argument('--model_y', dest=model_y)
+parser.add_argument('--dim', dest=dim, type=int, default=64)
+
 torch.set_default_tensor_type(torch.DoubleTensor)
 
 
@@ -163,11 +173,11 @@ if __name__ == '__main__':
     save_to = './new_features.gz'
 
     # the size of the new space learned by the model (number of the new features)
-    outdim_size = 10
+    outdim_size = args.dim
 
     # size of the input for view 1 and view 2
-    input_shape1 = 784
-    input_shape2 = 784
+    #input_shape1 = 784
+    #input_shape2 = 784
 
     # number of layers with nodes in each one
     layer_sizes1 = [1024, 1024, 1024, outdim_size]
@@ -195,8 +205,9 @@ if __name__ == '__main__':
     # Each view is stored in a gzip file separately. They will get downloaded the first time the code gets executed.
     # Datasets get stored under the datasets folder of user's Keras folder
     # normally under [Home Folder]/.keras/datasets/
-    data1 = load_data('./noisymnist_view1.gz')
-    data2 = load_data('./noisymnist_view2.gz')
+    data1, input_shape1 = load_data(args.model_x)
+    data2, input_shape2 = load_data(args.model_y)
+    
     # Building, training, and producing the new features by DCCA
     model = DeepCCA(layer_sizes1, layer_sizes2, input_shape1,
                     input_shape2, outdim_size, use_all_singular_values, device=device).double()
@@ -205,9 +216,9 @@ if __name__ == '__main__':
         l_cca = linear_cca()
     solver = Solver(model, l_cca, outdim_size, epoch_num, batch_size,
                     learning_rate, reg_par, device=device)
-    train1, train2 = data1[0][0], data2[0][0]
-    val1, val2 = data1[1][0], data2[1][0]
-    test1, test2 = data1[2][0], data2[2][0]
+    train1, train2 = data1[0], data2[0]
+    val1, val2 = data1[1], data2[1]
+    test1, test2 = data1[2], data2[2]
 
     solver.fit(train1, train2, val1, val2, test1, test2)
     # TODO: Save l_cca model if needed

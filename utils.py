@@ -5,26 +5,25 @@ import numpy as np
 import torch
 
 
-def load_data(data_file):
-    """loads the data from the gzip pickled files, and converts to numpy arrays"""
+def load_data(model):
+    """loads the data from the csv files, and converts to numpy arrays"""
     print('loading data ...')
-    f = gzip.open(data_file, 'rb')
-    train_set, valid_set, test_set = load_pickle(f)
-    f.close()
+    view = pd.read_csv('~/features/OR_2011_synthetic_' + model + '_features.csv', header=None, index_col=0)
+    train_ids = pd.read_csv('~/split/OR_2011_train_IDs_synthetic.csv', header=0, index_col=0)
+    test_ids = pd.read_csv('~/split/OR_2011_test_IDs_synthetic.csv', header=0, index_col=0)
+    val_ids = pd.read_csv('~/split/OR_2011_val_IDs_synthetic.csv', header=0, index_col=0)
+    
+    train_set = make_tensor(view_x.loc[train_ids.x])
+    test_set = make_tensor(view_x.loc[test_ids.x])
+    val_set = make_tensor(view_x.loc[val_ids.x])
 
-    train_set_x, train_set_y = make_tensor(train_set)
-    valid_set_x, valid_set_y = make_tensor(valid_set)
-    test_set_x, test_set_y = make_tensor(test_set)
-
-    return [(train_set_x, train_set_y), (valid_set_x, valid_set_y), (test_set_x, test_set_y)]
+    return ([train_set, valid_set, test_set], len(train_set.columns))
 
 
-def make_tensor(data_xy):
+def make_tensor(data):
     """converts the input to numpy arrays"""
-    data_x, data_y = data_xy
-    data_x = torch.tensor(data_x)
-    data_y = np.asarray(data_y, dtype='int32')
-    return data_x, data_y
+    data = torch.tensor(data)
+    return data
 
 
 def svm_classify(data, C):
