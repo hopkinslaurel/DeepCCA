@@ -3,7 +3,7 @@ from sklearn import svm
 from sklearn.metrics import accuracy_score
 import numpy as np
 import torch
-
+import pandas as pd
 
 def load_data(model):
     """loads the data from the csv files, and converts to numpy arrays"""
@@ -13,11 +13,12 @@ def load_data(model):
     test_ids = pd.read_csv('~/split/OR_2011_test_IDs_synthetic.csv', header=0, index_col=0)
     val_ids = pd.read_csv('~/split/OR_2011_val_IDs_synthetic.csv', header=0, index_col=0)
     
-    train_set = make_tensor(view_x.loc[train_ids.x])
-    test_set = make_tensor(view_x.loc[test_ids.x])
-    val_set = make_tensor(view_x.loc[val_ids.x])
+    train_set = make_tensor(view.loc[train_ids.x].values)
+    test_set = make_tensor(view.loc[test_ids.x].values)
+    val_set = make_tensor(view.loc[val_ids.x].values)
+    dim = len(view.columns)
 
-    return ([train_set, valid_set, test_set], len(train_set.columns))
+    return ([train_set, val_set, test_set], dim)
 
 
 def make_tensor(data):

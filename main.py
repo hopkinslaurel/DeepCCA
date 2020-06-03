@@ -24,6 +24,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model_x', dest='model_x')
 parser.add_argument('--model_y', dest='model_y')
 parser.add_argument('--dim', dest='dim', type=int, default=64)
+parser.add_argument('--epochs', dest='epochs', type=int, default=15)
 args = parser.parse_args()
 print(args)
 
@@ -187,7 +188,7 @@ if __name__ == '__main__':
 
     # the parameters for training the network
     learning_rate = 1e-3
-    epoch_num = 1
+    epoch_num = args.epochs
     batch_size = 800
 
     # the regularization parameter of the network
@@ -196,7 +197,7 @@ if __name__ == '__main__':
 
     # specifies if all the singular values should get used to calculate the correlation or just the top outdim_size ones
     # if one option does not work for a network or dataset, try the other one
-    use_all_singular_values = False
+    use_all_singular_values = True
 
     # if a linear CCA should get applied on the learned features extracted from the networks
     # it does not affect the performance on noisy MNIST significantly
@@ -235,9 +236,9 @@ if __name__ == '__main__':
         new_data.append([outputs[0][set_size[idx]:set_size[idx + 1], :],
                          outputs[1][set_size[idx]:set_size[idx + 1], :], data1[idx][1]])
     # Training and testing of SVM with linear kernel on the view 1 with new features
-    [test_acc, valid_acc] = svm_classify(new_data, C=0.01)
+    """ [test_acc, valid_acc] = svm_classify(new_data, C=0.01)
     print("Accuracy on view 1 (validation data) is:", valid_acc * 100.0)
-    print("Accuracy on view 1 (test data) is:", test_acc*100.0)
+    print("Accuracy on view 1 (test data) is:", test_acc*100.0)"""
     # Saving new features in a gzip pickled file specified by save_to
     print('saving new features ...')
     f1 = gzip.open(save_to, 'wb')

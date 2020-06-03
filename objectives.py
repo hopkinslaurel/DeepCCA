@@ -71,16 +71,25 @@ class cca_loss():
 
         if self.use_all_singular_values:
             # all singular values are used to calculate the correlation
-            tmp = torch.trace(torch.matmul(Tval.t(), Tval))
+            ##tmp = torch.trace(torch.matmul(Tval.t(), Tval))
             # print(tmp)
-            corr = torch.sqrt(tmp)
+            ##corr = torch.sqrt(tmp)
             # assert torch.isnan(corr).item() == 0
+            trace_TT = torch.matmul(Tval.t(), Tval)
+            trace_TT = torch.add(trace_TT, (torch.eye(trace_TT.shape[0])*r1).to(self.device)) # regularization for more stability
+            U, V = torch.symeig(trace_TT, eigenvectors=True)
+            #U = torch.where(U>eps, U, (torch.ones(U.shape).double()*eps).to(self.device))
+            print(torch.sqrt(U))
+            #U = U.topk(self.outdim_size)[0]
+            corr = torch.sum(torch.sqrt(U))
+
         else:
             # just the top self.outdim_size singular values are used
             trace_TT = torch.matmul(Tval.t(), Tval)
             trace_TT = torch.add(trace_TT, (torch.eye(trace_TT.shape[0])*r1).to(self.device)) # regularization for more stability
             U, V = torch.symeig(trace_TT, eigenvectors=True)
             U = torch.where(U>eps, U, (torch.ones(U.shape).double()*eps).to(self.device))
+            print(torch.sqrt(U))
             U = U.topk(self.outdim_size)[0]
             corr = torch.sum(torch.sqrt(U))
         return -corr
